@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Main</string>
+    <string name="twitter_oauth_consumer_key">F7s1WbLuCCuRupvmntYrFg</string>
+    <string name="twitter_oauth_consumer_secret">PWPIpLzWHGGI24hsVeLwiThLa4OkpxzAyHcGMhBjVs</string>
+    <string name="twitter_callback_url">twitter-oauth://callback</string>
 </resources>
