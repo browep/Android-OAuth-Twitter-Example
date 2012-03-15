@@ -37,10 +37,13 @@ public class Main extends Activity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        commonsHttpOAuthProvider = new CommonsHttpOAuthProvider(TWITTER_OAUTH_REQUEST_TOKEN_ENDPOINT, TWITTER_OAUTH_ACCESS_TOKEN_ENDPOINT, TWITTER_OAUTH_AUTHORIZE_ENDPOINT);
-        commonsHttpOAuthConsumer = new CommonsHttpOAuthConsumer(getString(R.string.twitter_oauth_consumer_key), getString(R.string.twitter_oauth_consumer_secret));
+        commonsHttpOAuthProvider = new CommonsHttpOAuthProvider(TWITTER_OAUTH_REQUEST_TOKEN_ENDPOINT,
+                TWITTER_OAUTH_ACCESS_TOKEN_ENDPOINT, TWITTER_OAUTH_AUTHORIZE_ENDPOINT);
+        commonsHttpOAuthConsumer = new CommonsHttpOAuthConsumer(getString(R.string.twitter_oauth_consumer_key),
+                getString(R.string.twitter_oauth_consumer_secret));
         commonsHttpOAuthProvider.setOAuth10a(true);
-        TwDialog dialog = new TwDialog(this, commonsHttpOAuthProvider, commonsHttpOAuthConsumer, dialogListener, R.drawable.android);
+        TwDialog dialog = new TwDialog(this, commonsHttpOAuthProvider, commonsHttpOAuthConsumer,
+                dialogListener, R.drawable.android);
         dialog.show();
 
     }
@@ -48,38 +51,31 @@ public class Main extends Activity
 
     private Twitter.DialogListener dialogListener = new Twitter.DialogListener() {
         public void onComplete(Bundle values) {
-
             String secretToken = values.getString("secret_token");
             Log.i(TAG,"secret_token=" + secretToken);
             String accessToken = values.getString("access_token");
             Log.i(TAG,"access_token=" + accessToken);
-            new Tweeter(accessToken,secretToken).tweet("Tweet from sample Android OAuth app.  unique code: " + System.currentTimeMillis());
+            new Tweeter(accessToken,secretToken).tweet(
+                    "Tweet from sample Android OAuth app.  unique code: " + System.currentTimeMillis());
         }
 
-        public void onTwitterError(TwitterError e) {
+        public void onTwitterError(TwitterError e) { Log.e(TAG,"onTwitterError called for TwitterDialog",
+                new Exception(e)); }
 
-            Log.e(TAG,"onTwitterError called for TwitterDialog", new Exception(e));
-        }
+        public void onError(DialogError e) { Log.e(TAG,"onError called for TwitterDialog", new Exception(e)); }
 
-        public void onError(DialogError e) {
-            Log.e(TAG,"onError called for TwitterDialog", new Exception(e));
-
-        }
-
-        public void onCancel() {
-            Log.e(TAG,"onCancel");
-        }
+        public void onCancel() { Log.e(TAG,"onCancel"); }
     };
 
+    public static final Pattern ID_PATTERN = Pattern.compile(".*?\"id_str\":\"(\\d*)\".*");
+    public static final Pattern SCREEN_NAME_PATTERN = Pattern.compile(".*?\"screen_name\":\"([^\"]*).*");
 
     public class Tweeter {
-        protected CommonsHttpOAuthProvider oAuthProvider;
         protected CommonsHttpOAuthConsumer oAuthConsumer;
 
         public Tweeter(String accessToken, String secretToken) {
-            oAuthProvider = new CommonsHttpOAuthProvider(TWITTER_OAUTH_REQUEST_TOKEN_ENDPOINT,
-                    TWITTER_OAUTH_AUTHORIZE_ENDPOINT, TWITTER_OAUTH_ACCESS_TOKEN_ENDPOINT);
-            oAuthConsumer = new CommonsHttpOAuthConsumer(getString(R.string.twitter_oauth_consumer_key), getString(R.string.twitter_oauth_consumer_secret));
+            oAuthConsumer = new CommonsHttpOAuthConsumer(getString(R.string.twitter_oauth_consumer_key),
+                    getString(R.string.twitter_oauth_consumer_secret));
             oAuthConsumer.setTokenWithSecret(accessToken, secretToken);
         }
 
@@ -100,9 +96,9 @@ public class Main extends Activity
                 HttpResponse resp = httpClient.execute(post);
                 String jsonResponseStr = convertStreamToString(resp.getEntity().getContent());
                 Log.i(TAG,"response: " + jsonResponseStr);
-                String id = getFirstMatch(Pattern.compile(".*?\"id_str\":\"(\\d*)\".*"),jsonResponseStr);
+                String id = getFirstMatch(ID_PATTERN,jsonResponseStr);
                 Log.i(TAG,"id: " + id);
-                String screenName = getFirstMatch(Pattern.compile(".*?\"screen_name\":\"([^\"]*).*"),jsonResponseStr);
+                String screenName = getFirstMatch(SCREEN_NAME_PATTERN,jsonResponseStr);
                 Log.i(TAG,"screen name: " + screenName);
 
                 final String url = MessageFormat.format("https://twitter.com/#!/{0}/status/{1}",screenName,id);
